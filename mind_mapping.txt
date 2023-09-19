@@ -1,0 +1,20 @@
+1. Create JSON File for Questions
+2. Start Creating HTML Skeleton
+3. Add ummy Data for Styling
+4. Create the Styling
+5. Fetch Number of Questions From JSON
+6. Show Questions Count and Category
+7. Show the Number of Bullets Deppends on Questions Count
+8. Store the Number of the Right and Wrong Questions
+9. Create Countdown Timer
+10. Fetch the Questions from the JSON Object
+11. Show First Question
+12. Check the Choosen Answer then show the next Question
+13. If the Time is Up mark the Question as Wrong and show the next Question
+14. Add Class on Bullet After Answering the Question
+15. If the Questions finished then Show the Result
+
+Ideas
+    1. Many JSON files and Choose the language
+    2. Add Many Questions and Choose Questions Randomly
+    3. Randomize Answers
