@@ -1,36 +1,40 @@
 // Select Elements
 let countSpan = document.querySelector(".quiz-info .count span");
+let bullets = document.querySelector(".bullets");
 let bulletsSpans = document.querySelector(".bullets .spans");
 let currentQuestion = 0;
 let quizArea = document.querySelector(".quiz-area");
 let answersArea = document.querySelector(".answers-area");
-let rightAnswers = 0, wrongAnswers = 0;
+let rightAnswers = 0, wrongAnswers = 0, countdownInterval;
 let submitButton = document.querySelector(".submit-button");
+let results = document.querySelector(".results");
+let countdownDiv = document.querySelector(".countdown");
 
 function getQuestions() {
     let request = new XMLHttpRequest();
-    request.onreadystatechange = function () {
+    request.onreadystatechange = function (e) {
         if (this.readyState === 4 && this.status === 200) {
             let questionsObject = JSON.parse(this.responseText);
             let questionsNumber = Object.keys(questionsObject).length;
 
             createBullets(questionsNumber);
-            addQuestionData(questionsObject[currentQuestion], questionsNumber);
+            addQuestionData(questionsObject[currentQuestion]);
+            countdown(120);
             submitButton.onclick = function () {
                 let currentQuestionObj = questionsObject[currentQuestion];
                 let rightAnswer = currentQuestionObj["right_answer"];
-                let radioButtons = Array.from(document.querySelectorAll(".answers-area input"));
-                radioButtons.forEach((radio) => {
-                    if (radio.checked) {
-                        if (radio.dataset.answer === rightAnswer) {
-                            rightAnswers +=1;
-                            console.log(rightAnswers);
-                        } else {
-                            wrongAnswers +=1;
-                        }
-                    }
-                })
-                currentQuestion +=1;
+                checkAnswer(rightAnswer);
+                removeOldQuestion();
+                if (currentQuestion == questionsNumber-1) {
+                    submitButton.classList.add("finish");
+                    showResults(questionsNumber);
+                } else {
+                    currentQuestion++;
+                    countdown(120);
+                    addQuestionData(questionsObject[currentQuestion], questionsNumber);
+                    let bulletsArray = Array.from(document.querySelectorAll(".bullets .spans span"));
+                    bulletsArray[currentQuestion].classList.add("active");
+                }
             }
         }
     }
@@ -51,7 +55,7 @@ function createBullets(num) {
 }
 
 // Function to Add Question Data to the Page
-function addQuestionData(questionObject, questionsCounts) {
+function addQuestionData(questionObject) {
     let questionTitle = document.createElement("h2");
     questionTitle.appendChild(document.createTextNode(questionObject["title"]));
     quizArea.appendChild(questionTitle);
@@ -80,4 +84,53 @@ function addQuestionData(questionObject, questionsCounts) {
     }
 }
 
+// Function to Check if the Chosen answer is right or wrong
+function checkAnswer(rightAnswer) {
+    let radioButtons = Array.from(document.getElementsByName("question"));
+    radioButtons.forEach((radio) => {
+        if (radio.checked) {
+            if (radio.dataset.answer === rightAnswer) {
+                rightAnswers +=1;
+            } else {
+                wrongAnswers +=1;
+            }
+        }
+    })
+}
+
+// Function tod Remove The Previous Question
+function removeOldQuestion() {
+    let questionTitle = document.querySelector(".quiz-area h2");
+    questionTitle.remove();
+    let answers = Array.from(document.querySelectorAll(".answers-area div"));
+    for(let i = 0 ; i < answers.length ; i++) {
+        answers[i].remove();
+    }
+}
+
+// Function to Show the Final Result
+function showResults(questionsNumber) {
+    quizArea.remove();
+    answersArea.remove();
+    submitButton.remove();
+    bullets.remove();
+    let text = document.createTextNode(`You Answered ${rightAnswers} Questions out of ${questionsNumber}`);
+    results.appendChild(text);
+}
+
+// Function To make a Timer for the Question
+function countdown(duration) {
+    let minutes, seconds;
+    countdownInterval = setInterval(() => {
+        minutes = parseInt(duration / 60);
+        seconds = parseInt(duration % 60);
+        countdownDiv.innerHTML = `${minutes} : ${seconds}`;
+        if (--duration < 0) {
+            clearInterval(countdownInterval);
+            submitButton.click();
+        }
+    }, 1000);
+}
+
+// Run The Main Function
 getQuestions();
